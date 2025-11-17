@@ -377,3 +377,164 @@ This app could save lives by centering the most marginalized survivors.
 **Last Updated**: November 17, 2025  
 **Built By**: Claude Code  
 **Build Duration**: Initial foundation sprint
+
+---
+
+## MODULAR ARCHITECTURE UPDATE (Nov 17, 2025)
+
+### Dual App Strategy ✅
+
+SafeHaven now supports **TWO deployment methods** for maximum survivor safety:
+
+#### 1. Standalone SafeHaven App (`app/`)
+- Direct access to all safety features
+- Clear branding: "SafeHaven"
+- For survivors who want explicit DV safety app
+- No hiding needed
+
+#### 2. Hidden in NeuroThrive App (`safehaven-core/`)
+- **Plausible deniability**: Appears as innocent wellness app
+- Hidden entry via secret gesture (3 rapid double-taps)
+- If abuser sees "NeuroThrive" → looks like mental health app
+- SafeHaven features completely hidden until unlocked
+
+### Why This Matters
+
+**Survivor Safety Scenarios:**
+
+**Scenario A**: Survivor has privacy, wants direct access
+- Downloads standalone "SafeHaven" app
+- Full features immediately visible
+
+**Scenario B**: Abuser monitors phone
+- Downloads "NeuroThrive" (wellness/mental health app)
+- SafeHaven hidden inside, accessed via secret gesture
+- Abuser sees innocent app name/icon
+- Survivor has plausible deniability
+
+### Module Structure
+
+```
+SafeHaven-Build/
+├── app/
+│   ├── Standalone SafeHaven app
+│   ├── Depends on: safehaven-core
+│   └── ApplicationId: app.neurothrive.safehaven
+│
+├── safehaven-core/
+│   ├── Reusable library module
+│   ├── All security features (encryption, camera, panic delete)
+│   ├── All database entities and DAOs
+│   ├── All domain logic
+│   └── Can integrate into ANY Android app
+│
+└── NEUROTHRIVE_INTEGRATION_GUIDE.md
+    └── Complete integration instructions
+```
+
+### Integration Features ✅
+
+**Hidden Entry Points:**
+- ✅ 3 rapid double-taps on wellness journal header
+- ✅ Secret code "safehaven2025" in invisible text field
+- ✅ 5 rapid taps on "About" button
+- ✅ Custom gesture (implementer's choice)
+
+**Stealth Features:**
+- ✅ App switcher shows "NeuroThrive" (not SafeHaven)
+- ✅ Notifications disguised as wellness reminders
+- ✅ Lock screen prevents screenshots
+- ✅ Separate encrypted database (`safehaven_db`)
+
+**Safety Guarantees:**
+- ✅ Panic delete ONLY removes SafeHaven data
+- ✅ NeuroThrive wellness data always intact
+- ✅ GPS OFF by default
+- ✅ Silent camera (no sound/flash)
+- ✅ All evidence encrypted immediately
+
+### Database Separation
+
+**Critical Design Decision:**
+
+```
+NeuroThrive App Databases:
+├── neurothrive_db (wellness journals, meditation, etc.)
+│   └── NOT affected by SafeHaven panic delete
+│
+└── safehaven_db (incident reports, evidence, documents)
+    └── DELETED by SafeHaven panic delete
+```
+
+This ensures:
+- Panic delete is surgical (only SafeHaven data)
+- NeuroThrive data never at risk
+- Clear separation of concerns
+- Survivor can use both features safely
+
+### Integration Steps (Summary)
+
+For NeuroThrive developers:
+
+1. Copy `safehaven-core/` to NeuroThrive project
+2. Update `settings.gradle.kts`: `include(":safehaven-core")`
+3. Update `app/build.gradle.kts`: `implementation(project(":safehaven-core"))`
+4. Initialize in Application: `SafeHavenCrypto.initializeKey()`
+5. Add hidden entry point (e.g., 3 rapid double-taps)
+6. Setup navigation to SafeHaven screens
+7. Configure panic delete (shake detector)
+8. Test stealth features
+
+See **NEUROTHRIVE_INTEGRATION_GUIDE.md** for complete instructions.
+
+### Files Added in This Update
+
+**New Files (30):**
+- `safehaven-core/build.gradle.kts` - Library module config
+- `safehaven-core/README.md` - Module documentation
+- `safehaven-core/src/main/...` - 27 source files (copied from app/)
+- `NEUROTHRIVE_INTEGRATION_GUIDE.md` - Integration instructions
+
+**Modified Files (2):**
+- `app/build.gradle.kts` - Now depends on safehaven-core
+- `settings.gradle.kts` - Includes safehaven-core module
+
+### Version History
+
+**v1.0.0** (Nov 17, 2025) - Initial standalone app  
+**v1.1.0** (Nov 17, 2025) - **Modular architecture added**
+- safehaven-core library module
+- NeuroThrive integration support
+- Dual deployment strategy
+- Hidden entry points
+- Stealth features
+
+---
+
+## Integration Example
+
+**Before (standalone only):**
+```
+User downloads: "SafeHaven" app
+Abuser sees: "SafeHaven - DV Safety" (EXPOSED)
+```
+
+**After (dual strategy):**
+```
+Option A - Direct:
+User downloads: "SafeHaven" app
+Result: Full features, no hiding
+
+Option B - Hidden:
+User downloads: "NeuroThrive - Wellness & Mental Health" app
+Abuser sees: Innocent wellness app
+User knows: 3 rapid double-taps → SafeHaven unlocks
+Result: Plausible deniability + full features
+```
+
+This dual strategy could save lives by giving survivors flexibility in how they access safety features.
+
+---
+
+**Total Commits**: 2  
+**Latest Commit**: 1b6fcca - "Add modular architecture: Standalone + NeuroThrive integration"
