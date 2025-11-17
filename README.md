@@ -16,6 +16,11 @@
 - **[Database Schema](# SafeHaven Database Schema (Room).md)** - Room entities and DAOs
 - **[Complete Documentation](NeuroThrive%20SafeHaven%20-%20Complete%20Documentation.md)** - Full project docs
 
+### 🆕 New Resources
+- **[Abuse Resources & Self-Help Guide](SafeHaven%20Abuse%20Resources%20and%20Self-Help%20Guide.md)** - Comprehensive guide on abuse types, emotional abuse identification, DARVO tactics, and court documentation strategies
+- **[Enhanced Emergency Alert System](SafeHaven%20Enhanced%20Emergency%20Alert%20System.md)** - SOS panic button specifications, emergency alerts, and offline capabilities
+- **[Ecosystem & Web Presence Strategy](SafeHaven%20Ecosystem%20and%20Web%20Presence%20Strategy.md)** - Web platform, BestyBnB (pet safety), and LadyDriver (women's ride-share) specifications
+
 ---
 
 ## 🎯 What You're Building
@@ -196,6 +201,9 @@ Safehaven-documentation/
 ├── SafeHaven Quick Start Guide - 24.md
 ├── SafeHaven Database Schema (Room).md
 ├── NeuroThrive SafeHaven - Complete Documentation.md
+├── SafeHaven Abuse Resources and Self-Help Guide.md (NEW)
+├── SafeHaven Enhanced Emergency Alert System.md (NEW)
+├── SafeHaven Ecosystem and Web Presence Strategy.md (NEW)
 ├── Create GitHub Repository.md
 └── INSTRUCTION FOR CLAUDE CODE.md
 ```
