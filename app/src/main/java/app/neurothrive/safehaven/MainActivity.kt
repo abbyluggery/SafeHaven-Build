@@ -3,14 +3,12 @@ package app.neurothrive.safehaven
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import app.neurothrive.safehaven.domain.usecases.PanicDeleteUseCase
+import app.neurothrive.safehaven.ui.navigation.SafeHavenNavGraph
+import app.neurothrive.safehaven.ui.navigation.Screen
+import app.neurothrive.safehaven.ui.theme.SafeHavenTheme
 import app.neurothrive.safehaven.util.sensors.ShakeDetector
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
@@ -22,7 +20,8 @@ import javax.inject.Inject
  * CRITICAL FEATURES:
  * - Shake detection for panic delete
  * - Material Design 3 theme
- * - Jetpack Compose UI
+ * - Jetpack Compose UI with Navigation
+ * - 12 feature screens
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -42,16 +41,20 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SafeHavenTheme {
+                val navController = rememberNavController()
+
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen()
+                    SafeHavenNavGraph(
+                        navController = navController,
+                        startDestination = Screen.Onboarding.route
+                    )
                 }
             }
         }
 
-        Timber.d("MainActivity created")
+        Timber.d("MainActivity created with navigation")
     }
 
     override fun onResume() {
@@ -72,74 +75,4 @@ class MainActivity : ComponentActivity() {
         // TODO: Implement Compose AlertDialog
         Timber.w("Panic delete triggered - dialog not yet implemented")
     }
-}
-
-@Composable
-fun SafeHavenTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = lightColorScheme(
-            primary = androidx.compose.ui.graphics.Color(0xFF6B4EE6),
-            secondary = androidx.compose.ui.graphics.Color(0xFF9C89F5),
-            tertiary = androidx.compose.ui.graphics.Color(0xFF7D5260)
-        ),
-        content = content
-    )
-}
-
-@Composable
-fun HomeScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "SafeHaven",
-            style = MaterialTheme.typography.displayLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "A safe, encrypted space for survivors",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "🔒 Core Features Implemented:",
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        FeatureItem("✅ AES-256-GCM Encryption")
-        FeatureItem("✅ Room Database (6 entities)")
-        FeatureItem("✅ Silent Camera System")
-        FeatureItem("✅ Panic Delete (Shake Detection)")
-        FeatureItem("✅ Document Verification")
-        FeatureItem("✅ Intersectional Resource Matching")
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "UI screens coming next...",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
-        )
-    }
-}
-
-@Composable
-fun FeatureItem(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(vertical = 4.dp)
-    )
 }

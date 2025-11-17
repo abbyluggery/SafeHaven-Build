@@ -1,0 +1,157 @@
+package app.neurothrive.safehaven.ui.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import app.neurothrive.safehaven.ui.screens.*
+
+/**
+ * SafeHaven Navigation Routes
+ */
+sealed class Screen(val route: String) {
+    object Onboarding : Screen("onboarding")
+    object Login : Screen("login")
+    object Home : Screen("home")
+    object ProfileSetup : Screen("profile_setup")
+    object SilentCamera : Screen("silent_camera")
+    object IncidentReport : Screen("incident_report")
+    object EvidenceVault : Screen("evidence_vault")
+    object DocumentVerification : Screen("document_verification")
+    object ResourceFinder : Screen("resource_finder")
+    object ResourceDetail : Screen("resource_detail/{resourceId}") {
+        fun createRoute(resourceId: String) = "resource_detail/$resourceId"
+    }
+    object SafetyPlan : Screen("safety_plan")
+    object Settings : Screen("settings")
+}
+
+/**
+ * SafeHaven Navigation Graph
+ */
+@Composable
+fun SafeHavenNavGraph(
+    navController: NavHostController,
+    startDestination: String = Screen.Onboarding.route
+) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        // Onboarding
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onGetStarted = {
+                    navController.navigate(Screen.ProfileSetup.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Profile Setup
+        composable(Screen.ProfileSetup.route) {
+            ProfileSetupScreen(
+                onComplete = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Login
+        composable(Screen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Home Dashboard
+        composable(Screen.Home.route) {
+            HomeScreen(
+                onNavigateToCamera = { navController.navigate(Screen.SilentCamera.route) },
+                onNavigateToIncidents = { navController.navigate(Screen.IncidentReport.route) },
+                onNavigateToEvidence = { navController.navigate(Screen.EvidenceVault.route) },
+                onNavigateToVerification = { navController.navigate(Screen.DocumentVerification.route) },
+                onNavigateToResources = { navController.navigate(Screen.ResourceFinder.route) },
+                onNavigateToSafetyPlan = { navController.navigate(Screen.SafetyPlan.route) },
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+            )
+        }
+
+        // Silent Camera
+        composable(Screen.SilentCamera.route) {
+            SilentCameraScreen(
+                onBack = { navController.popBackStack() },
+                onPhotoSaved = { navController.popBackStack() }
+            )
+        }
+
+        // Incident Report
+        composable(Screen.IncidentReport.route) {
+            IncidentReportScreen(
+                onBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+
+        // Evidence Vault
+        composable(Screen.EvidenceVault.route) {
+            EvidenceVaultScreen(
+                onBack = { navController.popBackStack() },
+                onCaptureNew = { navController.navigate(Screen.SilentCamera.route) }
+            )
+        }
+
+        // Document Verification
+        composable(Screen.DocumentVerification.route) {
+            DocumentVerificationScreen(
+                onBack = { navController.popBackStack() },
+                onVerified = { navController.popBackStack() }
+            )
+        }
+
+        // Resource Finder
+        composable(Screen.ResourceFinder.route) {
+            ResourceFinderScreen(
+                onBack = { navController.popBackStack() },
+                onResourceClick = { resourceId ->
+                    navController.navigate(Screen.ResourceDetail.createRoute(resourceId))
+                }
+            )
+        }
+
+        // Resource Detail
+        composable(
+            route = Screen.ResourceDetail.route,
+            arguments = listOf(navArgument("resourceId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val resourceId = backStackEntry.arguments?.getString("resourceId") ?: ""
+            ResourceDetailScreen(
+                resourceId = resourceId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // Safety Plan
+        composable(Screen.SafetyPlan.route) {
+            SafetyPlanScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // Settings
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+    }
+}
