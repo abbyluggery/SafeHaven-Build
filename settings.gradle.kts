@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "SafeHaven"
 include(":app")
+include(":safehaven-core")
