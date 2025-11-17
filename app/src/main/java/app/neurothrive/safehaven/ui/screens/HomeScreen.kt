@@ -6,10 +6,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import app.neurothrive.safehaven.data.session.UserSession
 import app.neurothrive.safehaven.ui.components.FeatureCard
+import app.neurothrive.safehaven.ui.viewmodels.HomeViewModel
 
 /**
  * Home Screen - Main Dashboard
@@ -18,6 +22,8 @@ import app.neurothrive.safehaven.ui.components.FeatureCard
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    userSession: UserSession = hiltViewModel(),
     onNavigateToCamera: () -> Unit,
     onNavigateToIncidents: () -> Unit,
     onNavigateToEvidence: () -> Unit,
@@ -27,6 +33,17 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToHealthcare: () -> Unit = {}
 ) {
+    // Collect state from ViewModel
+    val stats by viewModel.stats.collectAsState()
+    val currentUserId by userSession.currentUserId.collectAsState(initial = null)
+
+    // Load dashboard when screen launches
+    LaunchedEffect(currentUserId) {
+        currentUserId?.let { userId ->
+            viewModel.loadDashboard(userId)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -51,7 +68,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Welcome Card
+            // Welcome Card with Stats
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -72,6 +89,31 @@ fun HomeScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
+
+                    // Quick Stats
+                    if (stats.incidentCount > 0 || stats.evidenceCount > 0 || stats.documentCount > 0) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider()
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            StatItem("Incidents", stats.incidentCount)
+                            StatItem("Evidence", stats.evidenceCount)
+                            StatItem("Documents", stats.documentCount)
+                        }
+
+                        if (stats.activeHealthcareJourneys > 0) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "🏥 ${stats.activeHealthcareJourneys} active healthcare journey(s)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
                 }
             }
 
@@ -208,5 +250,21 @@ fun HomeScreen(
                 onClick = onNavigateToHealthcare
             )
         }
+    }
+}
+
+@Composable
+private fun StatItem(label: String, count: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     }
 }

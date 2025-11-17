@@ -7,7 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import app.neurothrive.safehaven.data.session.UserSession
 import app.neurothrive.safehaven.ui.components.SafeHavenTopBar
+import app.neurothrive.safehaven.ui.viewmodels.IncidentReportViewModel
 
 /**
  * Incident Report Screen
@@ -18,18 +21,52 @@ import app.neurothrive.safehaven.ui.components.SafeHavenTopBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IncidentReportScreen(
+    viewModel: IncidentReportViewModel = hiltViewModel(),
+    userSession: UserSession = hiltViewModel(),
     onBack: () -> Unit,
     onSaved: () -> Unit
 ) {
-    var incidentType by remember { mutableStateOf("physical") }
-    var description by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var witnesses by remember { mutableStateOf("") }
-    var injuries by remember { mutableStateOf("") }
-    var policeInvolved by remember { mutableStateOf(false) }
-    var policeReportNumber by remember { mutableStateOf("") }
-    var medicalAttention by remember { mutableStateOf(false) }
-    var isSaving by remember { mutableStateOf(false) }
+    // Collect state from ViewModel
+    val uiState by viewModel.uiState.collectAsState()
+    val draft by viewModel.currentDraft.collectAsState()
+    val currentUserId by userSession.currentUserId.collectAsState(initial = null)
+
+    // Local form state (synced with ViewModel draft)
+    var incidentType by remember { mutableStateOf(draft.incidentType) }
+    var description by remember { mutableStateOf(draft.description) }
+    var location by remember { mutableStateOf(draft.location) }
+    var witnesses by remember { mutableStateOf(draft.witnesses) }
+    var injuries by remember { mutableStateOf(draft.injuries) }
+    var policeInvolved by remember { mutableStateOf(draft.policeInvolved) }
+    var policeReportNumber by remember { mutableStateOf(draft.policeReportNumber) }
+    var medicalAttention by remember { mutableStateOf(draft.medicalAttention) }
+
+    // Handle save success
+    LaunchedEffect(uiState.saveSuccess) {
+        if (uiState.saveSuccess) {
+            onSaved()
+            viewModel.resetSaveSuccess()
+        }
+    }
+
+    // Update ViewModel draft when fields change
+    LaunchedEffect(
+        incidentType, description, location, witnesses, injuries,
+        policeInvolved, policeReportNumber, medicalAttention
+    ) {
+        viewModel.updateDraft(
+            draft.copy(
+                incidentType = incidentType,
+                description = description,
+                location = location,
+                witnesses = witnesses,
+                injuries = injuries,
+                policeInvolved = policeInvolved,
+                policeReportNumber = policeReportNumber,
+                medicalAttention = medicalAttention
+            )
+        )
+    }
 
     val incidentTypes = listOf(
         "physical" to "Physical Abuse",
@@ -165,26 +202,47 @@ fun IncidentReportScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Error message
+            if (uiState.error != null) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = "Error: ${uiState.error}",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             // Save Button
             Button(
                 onClick = {
-                    isSaving = true
-                    // TODO: Save to repository (will encrypt sensitive fields)
-                    // repository.saveIncident(...)
-                    onSaved()
+                    currentUserId?.let { userId ->
+                        viewModel.saveIncidentReport(
+                            userId = userId,
+                            gpsEnabled = false, // TODO: Get from user settings
+                            latitude = null,
+                            longitude = null
+                        )
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = !isSaving && description.isNotBlank()
+                enabled = !uiState.isSaving && description.isNotBlank()
             ) {
-                if (isSaving) {
+                if (uiState.isSaving) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Save Incident Report")
+                    Text("Save Incident Report (Encrypted)")
                 }
             }
 
