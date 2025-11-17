@@ -4,15 +4,25 @@
 
 This CSV file contains domestic violence resources with **full intersectional support** (48 filter categories!) to ensure ALL survivors can find help - including those with dependents, from often-excluded populations, and facing transportation barriers.
 
-**Current Count**: 300 high-quality resources (expandable to 1,000+)
+**Current Count**: 410 high-quality resources (up from 300!)
 **Filter Categories**: 48 (up from 26!) - now includes dependent care, substance use, trafficking, TBI, and **TRANSPORTATION SUPPORT** (critical for rural survivors)!
 
 ## Resource Types
 
-- **shelter**: Emergency and transitional housing
-- **legal_aid**: Legal advocacy, immigration support, U-Visa/VAWA
-- **hotline**: 24/7 crisis support lines
-- **counseling**: Mental health services, support groups
+- **shelter**: Emergency and transitional housing (~240 resources)
+  - Pet-safe shelters: 30 specialized pet-friendly programs
+  - LGBTQ+ youth shelters: 15 youth-specific programs
+  - Greyhound Home Free partners: Multiple nationwide bus access points
+- **legal_aid**: Legal advocacy, immigration support, U-Visa/VAWA (~35 resources)
+  - Virtual legal services for rural access
+- **hotline**: 24/7 crisis support lines (~25 resources)
+- **counseling**: Mental health services, support groups (~60 resources)
+  - Virtual counseling services for rural survivors: 10+ statewide programs
+- **legal_forms**: **NEW!** Pro se document templates (~50 resources - ALL 50 STATES!)
+  - TSO/TRO (Temporary Restraining Order) forms
+  - RSO/PPO (Permanent Protective Order) forms
+  - Emergency custody forms
+  - Free, downloadable, state-specific forms for survivors who can't afford lawyers
 
 ## Geographic Coverage
 
