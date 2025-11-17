@@ -3,11 +3,19 @@ package app.neurothrive.safehaven.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import app.neurothrive.safehaven.data.session.UserSession
 import app.neurothrive.safehaven.ui.components.SafeHavenTopBar
+import app.neurothrive.safehaven.ui.viewmodels.LoginViewModel
 
 /**
  * Profile Setup Screen
@@ -22,11 +30,18 @@ import app.neurothrive.safehaven.ui.components.SafeHavenTopBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSetupScreen(
+    viewModel: LoginViewModel = hiltViewModel(),
+    userSession: UserSession = hiltViewModel(),
     onComplete: () -> Unit
 ) {
+    // Collect state from ViewModel
+    val uiState by viewModel.uiState.collectAsState()
+
+    var userId by remember { mutableStateOf("default_user") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var duressPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     // Intersectional identity
     var isLGBTQIA by remember { mutableStateOf(false) }
@@ -37,6 +52,11 @@ fun ProfileSetupScreen(
     var isUndocumented by remember { mutableStateOf(false) }
     var isDisabled by remember { mutableStateOf(false) }
     var isDeaf by remember { mutableStateOf(false) }
+
+    // Validation
+    val passwordsMatch = password == confirmPassword
+    val passwordValid = password.length >= 6
+    val canSubmit = passwordValid && passwordsMatch && password.isNotBlank()
 
     Scaffold(
         topBar = {
@@ -55,6 +75,14 @@ fun ProfileSetupScreen(
                 style = MaterialTheme.typography.headlineSmall
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Your data is encrypted and stays on your device.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             // Passwords
@@ -69,6 +97,33 @@ fun ProfileSetupScreen(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("SafeHaven Password") },
+                visualTransformation = if (passwordVisible)
+                    VisualTransformation.None
+                else
+                    PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible)
+                                Icons.Default.Visibility
+                            else
+                                Icons.Default.VisibilityOff,
+                            contentDescription = if (passwordVisible)
+                                "Hide password"
+                            else
+                                "Show password"
+                        )
+                    }
+                },
+                supportingText = {
+                    if (!passwordValid && password.isNotBlank()) {
+                        Text(
+                            "Password must be at least 6 characters",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                isError = !passwordValid && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -78,6 +133,16 @@ fun ProfileSetupScreen(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text("Confirm Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                supportingText = {
+                    if (!passwordsMatch && confirmPassword.isNotBlank()) {
+                        Text(
+                            "Passwords do not match",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                isError = !passwordsMatch && confirmPassword.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -87,6 +152,7 @@ fun ProfileSetupScreen(
                 value = duressPassword,
                 onValueChange = { duressPassword = it },
                 label = { Text("Duress Password (Optional)") },
+                visualTransformation = PasswordVisualTransformation(),
                 supportingText = { Text("Shows fake data if forced to open app") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -101,94 +167,120 @@ fun ProfileSetupScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "This information helps match you with resources that serve your community. All data stays encrypted on your device.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                )
+            ) {
+                Text(
+                    text = "This information helps match you with resources that serve your community. All data stays encrypted on your device.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Identity Checkboxes
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("LGBTQIA+")
-                Switch(checked = isLGBTQIA, onCheckedChange = { isLGBTQIA = it })
-            }
+            // Identity Switches
+            IdentitySwitch("LGBTQIA+", isLGBTQIA) { isLGBTQIA = it }
+            IdentitySwitch("Transgender", isTrans) { isTrans = it }
+            IdentitySwitch("Non-binary", isNonBinary) { isNonBinary = it }
+            IdentitySwitch("BIPOC", isBIPOC) { isBIPOC = it }
+            IdentitySwitch("Male-identifying", isMaleIdentifying) { isMaleIdentifying = it }
+            IdentitySwitch("Undocumented", isUndocumented) { isUndocumented = it }
+            IdentitySwitch("Disabled", isDisabled) { isDisabled = it }
+            IdentitySwitch("Deaf/Hard of Hearing", isDeaf) { isDeaf = it }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Transgender")
-                Switch(checked = isTrans, onCheckedChange = { isTrans = it })
-            }
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Non-binary")
-                Switch(checked = isNonBinary, onCheckedChange = { isNonBinary = it })
+            // Error message
+            if (uiState.error != null) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = "Error: ${uiState.error}",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("BIPOC")
-                Switch(checked = isBIPOC, onCheckedChange = { isBIPOC = it })
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Male-identifying")
-                Switch(checked = isMaleIdentifying, onCheckedChange = { isMaleIdentifying = it })
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Undocumented")
-                Switch(checked = isUndocumented, onCheckedChange = { isUndocumented = it })
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Disabled")
-                Switch(checked = isDisabled, onCheckedChange = { isDisabled = it })
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Deaf/Hard of Hearing")
-                Switch(checked = isDeaf, onCheckedChange = { isDeaf = it })
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
-                    // TODO: Save profile to database
-                    onComplete()
+                    viewModel.createProfile(
+                        userId = userId,
+                        realPassword = password,
+                        duressPassword = duressPassword.ifBlank { "default_duress_${password}" },
+                        onSuccess = {
+                            // Set user session
+                            kotlinx.coroutines.GlobalScope.launch {
+                                userSession.setCurrentUser(userId, isDuress = false)
+                            }
+                            onComplete()
+                        }
+                    )
+                    // TODO: Also create SurvivorProfile with intersectional data
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                enabled = canSubmit && !uiState.isAuthenticating
             ) {
-                Text("Complete Setup")
+                if (uiState.isAuthenticating) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("Complete Setup")
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Skip button
+            TextButton(
+                onClick = {
+                    // Create profile with default values
+                    viewModel.createProfile(
+                        userId = userId,
+                        realPassword = "demo123",
+                        duressPassword = "demo456",
+                        onSuccess = {
+                            kotlinx.coroutines.GlobalScope.launch {
+                                userSession.setCurrentUser(userId, isDuress = false)
+                            }
+                            onComplete()
+                        }
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Skip for now (Demo Mode)")
+            }
         }
+    }
+}
+
+@Composable
+private fun IdentitySwitch(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
