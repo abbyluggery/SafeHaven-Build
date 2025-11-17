@@ -26,6 +26,13 @@ sealed class Screen(val route: String) {
     }
     object SafetyPlan : Screen("safety_plan")
     object Settings : Screen("settings")
+
+    // Healthcare Journey Screens
+    object HealthcareResourceFinder : Screen("healthcare_resources")
+    object HealthcareJourneyPlanner : Screen("healthcare_journey_planner")
+    object HealthcareJourneyDetail : Screen("healthcare_journey/{journeyId}") {
+        fun createRoute(journeyId: String) = "healthcare_journey/$journeyId"
+    }
 }
 
 /**
@@ -82,7 +89,8 @@ fun SafeHavenNavGraph(
                 onNavigateToVerification = { navController.navigate(Screen.DocumentVerification.route) },
                 onNavigateToResources = { navController.navigate(Screen.ResourceFinder.route) },
                 onNavigateToSafetyPlan = { navController.navigate(Screen.SafetyPlan.route) },
-                onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                onNavigateToHealthcare = { navController.navigate(Screen.HealthcareResourceFinder.route) }
             )
         }
 
@@ -151,6 +159,47 @@ fun SafeHavenNavGraph(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        // Healthcare Resource Finder
+        composable(Screen.HealthcareResourceFinder.route) {
+            HealthcareResourceFinderScreen(
+                onBack = { navController.popBackStack() },
+                onClinicSelected = { clinic ->
+                    // Navigate to journey planner with selected clinic
+                    navController.navigate(Screen.HealthcareJourneyPlanner.route)
+                }
+            )
+        }
+
+        // Healthcare Journey Planner
+        composable(Screen.HealthcareJourneyPlanner.route) {
+            HealthcareJourneyPlannerScreen(
+                selectedClinic = null, // TODO: Pass selected clinic
+                onBack = { navController.popBackStack() },
+                onSaveJourney = {
+                    // Navigate back to home after saving
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
+                }
+            )
+        }
+
+        // Healthcare Journey Detail
+        composable(
+            route = Screen.HealthcareJourneyDetail.route,
+            arguments = listOf(navArgument("journeyId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val journeyId = backStackEntry.arguments?.getString("journeyId") ?: ""
+            HealthcareJourneyDetailScreen(
+                journeyId = journeyId,
+                onBack = { navController.popBackStack() },
+                onEditJourney = {
+                    // TODO: Navigate to edit journey screen
+                    navController.popBackStack()
+                }
             )
         }
     }

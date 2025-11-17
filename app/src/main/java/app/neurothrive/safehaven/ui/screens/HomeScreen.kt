@@ -24,7 +24,8 @@ fun HomeScreen(
     onNavigateToVerification: () -> Unit,
     onNavigateToResources: () -> Unit,
     onNavigateToSafetyPlan: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToHealthcare: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -189,6 +190,22 @@ fun HomeScreen(
                     )
                 },
                 onClick = onNavigateToSafetyPlan
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            FeatureCard(
+                title = "Healthcare Journey",
+                description = "Plan reproductive healthcare appointments",
+                icon = {
+                    Icon(
+                        Icons.Default.LocalHospital,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(40.dp)
+                    )
+                },
+                onClick = onNavigateToHealthcare
             )
         }
     }
