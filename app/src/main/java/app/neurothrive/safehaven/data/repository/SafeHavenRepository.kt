@@ -20,7 +20,8 @@ class SafeHavenRepository @Inject constructor(
     private val verifiedDocumentDao: VerifiedDocumentDao,
     private val evidenceItemDao: EvidenceItemDao,
     private val legalResourceDao: LegalResourceDao,
-    private val survivorProfileDao: SurvivorProfileDao
+    private val survivorProfileDao: SurvivorProfileDao,
+    private val healthcareJourneyDao: HealthcareJourneyDao
 ) {
 
     // ==================== SafeHaven Profile ====================
@@ -164,5 +165,189 @@ class SafeHavenRepository @Inject constructor(
 
     suspend fun updateSurvivorProfile(profile: SurvivorProfile) {
         survivorProfileDao.update(profile)
+    }
+
+    // ==================== Healthcare Journeys ====================
+
+    /**
+     * Get all healthcare journeys for a user
+     */
+    fun getAllHealthcareJourneysFlow(userId: String): Flow<List<HealthcareJourney>> {
+        return healthcareJourneyDao.getAllForUserFlow(userId)
+    }
+
+    /**
+     * Get active healthcare journeys (not completed or cancelled)
+     */
+    fun getActiveHealthcareJourneysFlow(userId: String): Flow<List<HealthcareJourney>> {
+        return healthcareJourneyDao.getActiveJourneysFlow(userId)
+    }
+
+    /**
+     * Get healthcare journeys by status
+     */
+    fun getHealthcareJourneysByStatusFlow(userId: String, status: String): Flow<List<HealthcareJourney>> {
+        return healthcareJourneyDao.getJourneysByStatusFlow(userId, status)
+    }
+
+    /**
+     * Get single healthcare journey by ID
+     */
+    suspend fun getHealthcareJourneyById(journeyId: String): HealthcareJourney? {
+        return healthcareJourneyDao.getById(journeyId)
+    }
+
+    /**
+     * Get single healthcare journey by ID (reactive)
+     */
+    fun getHealthcareJourneyByIdFlow(journeyId: String): Flow<HealthcareJourney?> {
+        return healthcareJourneyDao.getByIdFlow(journeyId)
+    }
+
+    /**
+     * Get upcoming healthcare journeys
+     */
+    fun getUpcomingHealthcareJourneysFlow(userId: String): Flow<List<HealthcareJourney>> {
+        return healthcareJourneyDao.getUpcomingJourneysFlow(userId)
+    }
+
+    /**
+     * Get journeys needing arrangements
+     */
+    fun getJourneysNeedingArrangementsFlow(userId: String): Flow<List<HealthcareJourney>> {
+        return healthcareJourneyDao.getJourneysNeedingArrangementsFlow(userId)
+    }
+
+    /**
+     * Get journeys eligible for auto-deletion
+     */
+    suspend fun getHealthcareJourneysForAutoDeletion(currentTimestamp: Long): List<HealthcareJourney> {
+        return healthcareJourneyDao.getJourneysForAutoDeletion(currentTimestamp)
+    }
+
+    /**
+     * Get count of active healthcare journeys
+     */
+    fun getActiveHealthcareJourneyCountFlow(userId: String): Flow<Int> {
+        return healthcareJourneyDao.getActiveJourneyCountFlow(userId)
+    }
+
+    /**
+     * Save new healthcare journey
+     * Note: Sensitive fields should already be encrypted before calling this
+     */
+    suspend fun saveHealthcareJourney(journey: HealthcareJourney) {
+        healthcareJourneyDao.insert(journey)
+    }
+
+    /**
+     * Update existing healthcare journey
+     */
+    suspend fun updateHealthcareJourney(journey: HealthcareJourney) {
+        healthcareJourneyDao.update(journey)
+    }
+
+    /**
+     * Delete healthcare journey
+     */
+    suspend fun deleteHealthcareJourney(journeyId: String) {
+        healthcareJourneyDao.deleteById(journeyId)
+    }
+
+    /**
+     * Delete all healthcare journeys for a user (for panic delete)
+     */
+    suspend fun deleteAllHealthcareJourneys(userId: String) {
+        healthcareJourneyDao.deleteAllForUser(userId)
+    }
+
+    /**
+     * Mark healthcare journey as completed
+     */
+    suspend fun markHealthcareJourneyCompleted(
+        journeyId: String,
+        completedTimestamp: Long,
+        autoDeleteDate: Long?
+    ) {
+        healthcareJourneyDao.markAsCompleted(journeyId, completedTimestamp, autoDeleteDate)
+    }
+
+    /**
+     * Cancel healthcare journey
+     */
+    suspend fun cancelHealthcareJourney(
+        journeyId: String,
+        reason: String?,
+        timestamp: Long
+    ) {
+        healthcareJourneyDao.cancelJourney(journeyId, reason, timestamp)
+    }
+
+    /**
+     * Update healthcare journey status
+     */
+    suspend fun updateHealthcareJourneyStatus(
+        journeyId: String,
+        newStatus: String,
+        timestamp: Long
+    ) {
+        healthcareJourneyDao.updateStatus(journeyId, newStatus, timestamp)
+    }
+
+    // ==================== Healthcare Resources (Specialized Queries) ====================
+
+    /**
+     * Get reproductive healthcare clinics
+     */
+    suspend fun getReproductiveHealthcareClinics(
+        state: String? = null,
+        acceptsOutOfState: Boolean = false
+    ): List<LegalResource> {
+        return if (state != null) {
+            legalResourceDao.getHealthcareClinicsInState(state)
+        } else if (acceptsOutOfState) {
+            legalResourceDao.getClinicsAcceptingOutOfState()
+        } else {
+            legalResourceDao.getByType("reproductive_healthcare")
+        }
+    }
+
+    /**
+     * Get recovery housing facilities
+     */
+    suspend fun getRecoveryHousing(state: String? = null): List<LegalResource> {
+        return if (state != null) {
+            legalResourceDao.getRecoveryHousingInState(state)
+        } else {
+            legalResourceDao.getByType("recovery_housing")
+        }
+    }
+
+    /**
+     * Get childcare providers
+     */
+    suspend fun getChildcareProviders(
+        duringAppointment: Boolean = false,
+        duringRecovery: Boolean = false
+    ): List<LegalResource> {
+        return when {
+            duringAppointment -> legalResourceDao.getChildcareDuringAppointment()
+            duringRecovery -> legalResourceDao.getChildcareDuringRecovery()
+            else -> legalResourceDao.getByType("childcare")
+        }
+    }
+
+    /**
+     * Get financial assistance resources
+     */
+    suspend fun getFinancialAssistance(): List<LegalResource> {
+        return legalResourceDao.getByType("financial_assistance")
+    }
+
+    /**
+     * Get accompaniment services
+     */
+    suspend fun getAccompanimentServices(): List<LegalResource> {
+        return legalResourceDao.getByType("accompaniment")
     }
 }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
  * - Vulnerable populations (pregnant, substance use, teen dating, elder abuse, trafficking, TBI, criminal record)
  * - Medical/mental health support
  * - Transportation support (CRITICAL FOR RURAL - pickup, virtual services, gas vouchers, Greyhound)
+ * - Reproductive healthcare (CRITICAL POST-ROE - clinics, recovery housing, childcare, financial aid, accompaniment)
  */
 @Dao
 interface LegalResourceDao {
@@ -111,4 +112,114 @@ interface LegalResourceDao {
 
     @Query("SELECT DISTINCT resourceType FROM legal_resources")
     suspend fun getAllResourceTypes(): List<String>
+
+    // ==================== REPRODUCTIVE HEALTHCARE QUERIES (POST-ROE SAFETY) ====================
+
+    /**
+     * Get reproductive healthcare clinics in a specific state
+     * Returns clinics that provide reproductive healthcare services
+     */
+    @Query("""
+        SELECT * FROM legal_resources
+        WHERE resourceType = 'reproductive_healthcare'
+        AND state = :state
+        AND providesReproductiveHealthcare = 1
+        ORDER BY city ASC
+    """)
+    suspend fun getHealthcareClinicsInState(state: String): List<LegalResource>
+
+    /**
+     * Get all clinics that accept out-of-state patients
+     * CRITICAL for survivors traveling for reproductive healthcare
+     */
+    @Query("""
+        SELECT * FROM legal_resources
+        WHERE resourceType = 'reproductive_healthcare'
+        AND acceptsOutOfStatePatients = 1
+        AND providesReproductiveHealthcare = 1
+        ORDER BY state ASC, city ASC
+    """)
+    suspend fun getClinicsAcceptingOutOfState(): List<LegalResource>
+
+    /**
+     * Get recovery housing facilities in a specific state
+     * Provides safe housing for survivors recovering from medical procedures
+     */
+    @Query("""
+        SELECT * FROM legal_resources
+        WHERE resourceType = 'recovery_housing'
+        AND state = :state
+        AND providesRecoveryHousing = 1
+        ORDER BY city ASC
+    """)
+    suspend fun getRecoveryHousingInState(state: String): List<LegalResource>
+
+    /**
+     * Get childcare providers that offer care during medical appointments
+     */
+    @Query("""
+        SELECT * FROM legal_resources
+        WHERE resourceType = 'childcare'
+        AND childcareDuringAppointment = 1
+        ORDER BY state ASC, city ASC
+    """)
+    suspend fun getChildcareDuringAppointment(): List<LegalResource>
+
+    /**
+     * Get childcare providers that offer care during recovery periods
+     */
+    @Query("""
+        SELECT * FROM legal_resources
+        WHERE resourceType = 'childcare'
+        AND childcareDuringRecovery = 1
+        ORDER BY state ASC, city ASC
+    """)
+    suspend fun getChildcareDuringRecovery(): List<LegalResource>
+
+    /**
+     * Get financial assistance resources for healthcare travel
+     */
+    @Query("""
+        SELECT * FROM legal_resources
+        WHERE resourceType = 'financial_assistance'
+        AND (financialAssistanceAvailable = 1 OR travelFundingAvailable = 1)
+        ORDER BY organizationName ASC
+    """)
+    suspend fun getFinancialAssistanceResources(): List<LegalResource>
+
+    /**
+     * Get accompaniment services (volunteer support for medical appointments)
+     */
+    @Query("""
+        SELECT * FROM legal_resources
+        WHERE resourceType = 'accompaniment'
+        AND accompanimentServices = 1
+        ORDER BY state ASC, city ASC
+    """)
+    suspend fun getAccompanimentServices(): List<LegalResource>
+
+    /**
+     * Comprehensive healthcare journey resource search
+     * Returns all resources matching survivor's journey needs
+     */
+    @Query("""
+        SELECT * FROM legal_resources
+        WHERE (
+            (resourceType = 'reproductive_healthcare' AND :needsClinic = 1) OR
+            (resourceType = 'recovery_housing' AND :needsHousing = 1) OR
+            (resourceType = 'childcare' AND :needsChildcare = 1) OR
+            (resourceType = 'financial_assistance' AND :needsFinancialAid = 1) OR
+            (resourceType = 'accompaniment' AND :needsAccompaniment = 1)
+        )
+        AND (:state IS NULL OR state = :state)
+        ORDER BY resourceType ASC, state ASC, city ASC
+    """)
+    suspend fun getHealthcareJourneyResources(
+        needsClinic: Boolean,
+        needsHousing: Boolean,
+        needsChildcare: Boolean,
+        needsFinancialAid: Boolean,
+        needsAccompaniment: Boolean,
+        state: String?
+    ): List<LegalResource>
 }
