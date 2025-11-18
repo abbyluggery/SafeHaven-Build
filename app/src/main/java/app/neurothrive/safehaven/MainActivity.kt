@@ -34,6 +34,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if opened via deep link from DivergentThrive PWA
+        handleDeepLink()
+
         // Initialize shake detector for panic delete
         shakeDetector = ShakeDetector(this) {
             showPanicConfirmationDialog()
@@ -65,6 +68,28 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         super.onPause()
         shakeDetector.stop()
+    }
+
+    /**
+     * Handle deep link from DivergentThrive PWA
+     * Deep link format: divergentthrive://safehaven/unlock
+     */
+    private fun handleDeepLink() {
+        val deepLinkUri = intent?.data
+        if (deepLinkUri != null) {
+            Timber.d("Deep link received: $deepLinkUri")
+
+            when {
+                deepLinkUri.toString() == "divergentthrive://safehaven/unlock" -> {
+                    Timber.i("SafeHaven unlock requested from DivergentThrive PWA")
+                    // App will open normally, showing onboarding or home screen
+                    // In future, could show special unlock confirmation dialog
+                }
+                else -> {
+                    Timber.w("Unknown deep link: $deepLinkUri")
+                }
+            }
+        }
     }
 
     /**
