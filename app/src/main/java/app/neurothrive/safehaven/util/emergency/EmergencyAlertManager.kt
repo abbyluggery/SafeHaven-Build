@@ -225,7 +225,7 @@ class EmergencyAlertManager @Inject constructor(
             customMessage
         } else {
             buildString {
-                append("🚨 EMERGENCY - ${contact.name} needs immediate help.\n\n")
+                append("EMERGENCY - ${contact.name} needs immediate help.\n\n")
 
                 if (location != null) {
                     append("Location: ${getAddress(location)}\n")
@@ -246,7 +246,7 @@ class EmergencyAlertManager @Inject constructor(
         try {
             val contacts = emergencyContactDao.getPrimaryContacts(userId)
 
-            val message = "✅ ALL CLEAR - I am safe now. Emergency alert canceled.\n\nTime: ${getCurrentTimeFormatted()}\n\nThis is an automated message from SafeHaven."
+            val message = "ALL CLEAR - I am safe now. Emergency alert canceled.\n\nTime: ${getCurrentTimeFormatted()}\n\nThis is an automated message from SafeHaven."
 
             for (contact in contacts) {
                 sendSMS(contact.phoneNumber, message)
@@ -264,7 +264,7 @@ class EmergencyAlertManager @Inject constructor(
         try {
             val contacts = emergencyContactDao.getPrimaryContacts(userId)
 
-            val message = "⚠️ FALSE ALARM - I accidentally triggered the emergency alert. I'm okay.\n\nTime: ${getCurrentTimeFormatted()}\n\nThis is an automated message from SafeHaven."
+            val message = "FALSE ALARM - I accidentally triggered the emergency alert. I'm okay.\n\nTime: ${getCurrentTimeFormatted()}\n\nThis is an automated message from SafeHaven."
 
             for (contact in contacts) {
                 sendSMS(contact.phoneNumber, message)
@@ -320,7 +320,7 @@ class EmergencyAlertManager @Inject constructor(
 
             if (contacts.isNotEmpty()) {
                 val message = buildString {
-                    append("📍 Location Update\n\n")
+                    append("Location Update\n\n")
                     append("${getAddress(location)}\n")
                     append("GPS: ${location.latitude}, ${location.longitude}\n")
                     append("Maps: https://maps.google.com/?q=${location.latitude},${location.longitude}\n\n")

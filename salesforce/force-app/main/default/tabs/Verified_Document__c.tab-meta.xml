@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customObject>true</customObject>
+    <label>Verified Documents</label>
+    <motiveColor>34AA44</motiveColor>
+    <icon>standard:document</icon>
+    <description>Blockchain-verified evidence documents with SHA-256 hash verification</description>
+</CustomTab>

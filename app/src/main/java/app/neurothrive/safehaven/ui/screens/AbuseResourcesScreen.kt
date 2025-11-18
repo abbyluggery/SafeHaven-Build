@@ -452,7 +452,7 @@ private fun VerbalAbuseContent() {
 @Composable
 private fun EmotionalAbuseContent() {
     AlertCard(
-        title = "⚠️ Important",
+        title = "Important",
         content = "Emotional abuse is one of the most dangerous and underrecognized forms of abuse. It often escalates to physical violence and causes severe psychological harm."
     )
 

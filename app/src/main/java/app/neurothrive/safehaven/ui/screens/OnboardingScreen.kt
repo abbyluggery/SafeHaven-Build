@@ -2,6 +2,13 @@ package app.neurothrive.safehaven.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -54,12 +61,12 @@ fun OnboardingScreen(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
             ) {
-                FeatureItem("🔒 Military-grade encryption")
-                FeatureItem("📸 Silent camera (no sound, no GPS)")
-                FeatureItem("📝 Legal incident documentation")
-                FeatureItem("🆘 Panic delete (shake to wipe)")
-                FeatureItem("🏠 Intersectional resource matching")
-                FeatureItem("✅ Document verification")
+                FeatureItem(Icons.Default.Lock, "Military-grade encryption")
+                FeatureItem(Icons.Default.CameraAlt, "Silent camera (no sound, no GPS)")
+                FeatureItem(Icons.Default.Description, "Legal incident documentation")
+                FeatureItem(Icons.Default.Warning, "Panic delete (shake to wipe)")
+                FeatureItem(Icons.Default.Home, "Intersectional resource matching")
+                FeatureItem(Icons.Default.CheckCircle, "Document verification")
             }
 
             // Get Started Button
@@ -90,13 +97,20 @@ fun OnboardingScreen(
 }
 
 @Composable
-private fun FeatureItem(text: String) {
+private fun FeatureItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge

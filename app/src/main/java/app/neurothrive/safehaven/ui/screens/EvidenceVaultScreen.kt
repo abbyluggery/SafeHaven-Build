@@ -6,6 +6,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -135,14 +139,16 @@ private fun EvidenceThumbnail(
             contentAlignment = Alignment.Center
         ) {
             // Show icon based on type
-            Text(
-                text = when (item.evidenceType) {
-                    "photo" -> "📷"
-                    "video" -> "🎥"
-                    "audio" -> "🎤"
-                    else -> "📄"
+            Icon(
+                imageVector = when (item.evidenceType) {
+                    "photo" -> Icons.Default.PhotoCamera
+                    "video" -> Icons.Default.Videocam
+                    "audio" -> Icons.Default.Mic
+                    else -> Icons.Default.InsertDriveFile
                 },
-                style = MaterialTheme.typography.displayMedium
+                contentDescription = "${item.evidenceType} evidence item",
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
 
             // File info at bottom

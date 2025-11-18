@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customObject>true</customObject>
+    <label>Risk Assessments</label>
+    <motiveColor>FF6B6B</motiveColor>
+    <icon>standard:goals</icon>
+    <description>AI-powered lethality risk assessments and crisis detection</description>
+</CustomTab>

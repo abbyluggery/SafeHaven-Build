@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customObject>true</customObject>
+    <label>Evidence Items</label>
+    <motiveColor>FF9933</motiveColor>
+    <icon>custom:custom42</icon>
+    <description>Encrypted evidence (photos, videos, audio) collected via silent camera</description>
+</CustomTab>
